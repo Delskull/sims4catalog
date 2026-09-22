@@ -8,11 +8,6 @@ wp-admin/
 wp-includes/
 my-plugins/
 plugins/
-
-themes/twentytwentythree/
-themes/twentytwentyfour/
-themes/twentytwentyfive/
-
 *history*
 .env
 **/vendor/
@@ -21,7 +16,7 @@ themes/twentytwentyfive/
 /wp-content/uploads
 /wp-content/plugins
 /wp-content/languages
-
+/wp-content/themes/*/
 !/wp-content/themes/sims4catalog/
 
 .DS_Store
