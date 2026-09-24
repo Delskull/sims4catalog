@@ -6,10 +6,14 @@
 
     <?php wp_head(); ?>
 </head>
-<body <?php body_class(); ?>>
+<body <?php body_class('d-flex flex-column min-vh-100'); ?>>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg custom-navbar mb-4">
     <div class="container">
-        <a class="navbar-brand fw-bold" href="<?php echo esc_url(home_url('/')); ?>">Sims 4 Mods</a>
+        <a class="navbar-brand fw-bold" href="<?php echo esc_url(home_url('/')); ?>">
+            <img src="<?php echo get_template_directory_uri(); ?>/src/img/sims4logo.jpg"
+                 class="main-logo"
+                 alt="logo">
+        </a>
     </div>
 </nav>

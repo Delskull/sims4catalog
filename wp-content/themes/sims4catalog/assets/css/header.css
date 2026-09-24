@@ -1,0 +1,16 @@
+.main-logo {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    mask-image: radial-gradient(circle, rgba(0,0,0,1) 41%, rgba(0,0,0,0) 70%);
+}
+
+.custom-navbar {
+    background-image: url('../../src/img/fon-navbar.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

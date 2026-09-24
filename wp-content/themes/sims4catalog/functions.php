@@ -5,6 +5,7 @@ if (!defined('ABSPATH')) {
 
 function sims4_catalog_scripts() {
     wp_enqueue_style('bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css', [], '5.3.3');
+    wp_enqueue_style('sims4-header', get_template_directory_uri() . '/assets/css/header.css', ['bootstrap'], time());
     wp_enqueue_style('sims4-style', get_stylesheet_uri(), ['bootstrap'], '1.0');
     wp_enqueue_script('bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js', [], '5.3.3', true);
 }

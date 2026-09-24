@@ -2,7 +2,7 @@
 get_header();
 ?>
 
-    <div class="container">
+    <div class="container flex-grow-1">
         <div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
             <div class="container-fluid py-5">
                 <h1 class="display-5 fw-bold text-primary">Добро пожаловать в мир Sims 4!</h1>
