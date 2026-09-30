@@ -28,7 +28,7 @@ $categories = get_categories([
                         <div class="card h-100 shadow-sm border border-2 border-dark py-4 hover-card  custom-navbar">
                             <img src="<?= $img_url ?>" class="card-img-top"
                                  alt=""
-                                 style="height: 140px; object-fit: cover;">
+                                 style="height: 140px; object-fit: contain;">
                             <div class="card-body py-3">
                                 <h5 class="card-title fw-bold m-0 text-uppercase"><?= esc_html($cat->name) ?></h5>
                             </div>
