@@ -23,7 +23,7 @@ $categories = get_categories([
                 <?php $img_url = get_field('category_image',
                         'category_' . $cat->term_id) ?>
                 <div class="col">
-                    <a href="#"
+                    <a href="<?php echo esc_url(get_category_link($cat -> term_id)); ?>"
                        class="text-decoration-none text-dark h-100 d-block">
                         <div class="card h-100 shadow-sm border border-2 border-dark py-4 hover-card  custom-navbar">
                             <img src="<?= $img_url ?>" class="card-img-top"
