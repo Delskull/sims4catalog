@@ -12,4 +12,5 @@ function sims4_catalog_scripts() {
 }
 
 add_action('wp_enqueue_scripts', 'sims4_catalog_scripts');
-
+add_filter('use_block_editor_for_post', '__return_false');
+add_theme_support('post-thumbnails');
