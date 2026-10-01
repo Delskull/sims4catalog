@@ -12,3 +12,4 @@ function sims4_catalog_scripts() {
 }
 
 add_action('wp_enqueue_scripts', 'sims4_catalog_scripts');
+
