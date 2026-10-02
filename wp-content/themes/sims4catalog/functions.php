@@ -22,12 +22,14 @@ function sims4_catalog_scripts()
 
 function get_sims4_mod_data(): array
 {
+    $raw_thumbnail = get_the_post_thumbnail_url(get_the_ID(), 'large');
+    $thumbnail = $raw_thumbnail ? $raw_thumbnail : get_theme_file_uri('assets/img/no-image.jpg');
     $mod_id = get_the_ID();
     return [
-        'download' => esc_url(get_field('mod_download_url',$mod_id)),
-        'author' => esc_html(get_field('mod_author',$mod_id)),
-        'source'   => esc_url(get_field('mod_source_url', $mod_id)),
-        'thumbnail'    => esc_url(get_the_post_thumbnail_url($mod_id, 'large')),
+        'download' => get_field('mod_download_url', $mod_id),
+        'author' => get_field('mod_author', $mod_id) ?? 'Неизвестный автор',
+        'source' => get_field('mod_source_url', $mod_id),
+        'thumbnail' => $thumbnail,
 
     ];
 }

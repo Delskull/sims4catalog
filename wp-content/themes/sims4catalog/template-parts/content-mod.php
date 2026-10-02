@@ -12,7 +12,7 @@ if (!$mod['thumbnail']) {
 <div class="col">
     <div class="card h-100 shadow-sm border border-2 border-dark overflow-hidden hover-card">
         <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark d-block h-100">
-            <img src="<?php echo $mod['thumbnail']; ?>" class="card-img-top"
+            <img src="<?php echo esc_url($mod['thumbnail']); ?>" class="card-img-top"
                  alt="<?php the_title_attribute(); ?>"
                  style="height: 220px; object-fit: cover;">
 
@@ -21,13 +21,13 @@ if (!$mod['thumbnail']) {
                 <div class="card-text text-muted small flex-grow-1 mb-3">
                     <?php the_excerpt(); ?>
                 </div>
-
+        </a>
                 <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
                     <?php if ($mod['download']) : ?>
-                        <a href="<?php echo $mod['download']; ?>"
+                        <a href="<?php echo esc_url($mod['download']); ?>"
                            class="btn btn-primary btn-sm px-4 rounded-pill fw-bold"
                            target="_blank">
-                            Скачать
+                            Подробнее
                         </a>
                     <?php else : ?>
                         <span class="text-muted small">Ссылка отсутствует</span>
@@ -36,6 +36,6 @@ if (!$mod['thumbnail']) {
                     <small class="text-muted"><?php echo get_the_date('d.m.Y'); ?></small>
                 </div>
             </div>
-        </a>
+
     </div>
 </div>
