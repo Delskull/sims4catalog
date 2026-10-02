@@ -23,7 +23,7 @@ function sims4_catalog_scripts()
 function get_sims4_mod_data(): array
 {
     $raw_thumbnail = get_the_post_thumbnail_url(get_the_ID(), 'large');
-    $thumbnail = $raw_thumbnail ? $raw_thumbnail : get_theme_file_uri('assets/img/no-image.jpg');
+    $thumbnail = $raw_thumbnail ? $raw_thumbnail : get_theme_file_uri('src/img/no-image.jpg');
     $mod_id = get_the_ID();
     return [
         'download' => get_field('mod_download_url', $mod_id),
