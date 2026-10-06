@@ -40,20 +40,23 @@ get_template_part('template-parts/categories-grid');
                                              ? esc_html($mod['author'])
                                              : 'Не указан'; ?>
                                 </span>
-                                <span class="d-block text-muted small mt-1">Добавлено: <?php echo get_the_date('d.m.Y'); ?></span>
+                                <span class="d-block text-muted small mt-1">
+                                    <?php esc_html_e('Добавлено: ', 'sims4catalog');
+                                    echo get_the_date('d.m.Y'); ?></span>
                             </div>
 
                             <div class="col-sm-6 text-sm-end text-center pe-sm-4">
                                 <?php if (!empty($mod['download'])) : ?>
                                     <a href="<?php echo esc_url($mod['download']); ?>"
                                        class="btn btn-success btn-lg px-5 py-3 rounded-pill fw-bold shadow hover-card"
-                                       target="_blank">
-                                        СКАЧАТЬ МОД
+                                       target="_blank"
+                                       rel="noopener">
+                                        <?php esc_html_e('СКАЧАТЬ МОД', 'sims4catalog') ?>
                                     </a>
                                 <?php else : ?>
                                     <button class="btn btn-secondary btn-lg px-5 py-3 rounded-pill fw-bold"
                                             disabled>
-                                        Ссылка отсутствует
+                                        <?php esc_html_e('Ссылка отсутствует', 'sims4catalog') ?>
                                     </button>
                                 <?php endif; ?>
                             </div>

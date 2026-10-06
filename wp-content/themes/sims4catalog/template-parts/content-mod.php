@@ -24,13 +24,12 @@ if (!$mod['thumbnail']) {
         </a>
                 <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
                     <?php if ($mod['download']) : ?>
-                        <a href="<?php echo esc_url($mod['download']); ?>"
-                           class="btn btn-primary btn-sm px-4 rounded-pill fw-bold"
-                           target="_blank">
-                            Подробнее
+                        <a href="<?php the_permalink(); ?>"
+                           class="btn btn-primary btn-sm px-4 rounded-pill fw-bold">
+                            <?php esc_html_e('Подробнее', 'sims4catalog'); ?>
                         </a>
                     <?php else : ?>
-                        <span class="text-muted small">Ссылка отсутствует</span>
+                        <span class="text-muted small"><?php esc_html_e('Ссылка отсутствует', 'sims4catalog'); ?></span>
                     <?php endif; ?>
 
                     <small class="text-muted"><?php echo get_the_date('d.m.Y'); ?></small>
