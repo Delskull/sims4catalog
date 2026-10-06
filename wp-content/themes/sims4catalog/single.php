@@ -1,5 +1,6 @@
 <?php
 get_header();
+get_template_part('template-parts/categories-grid');
 ?>
 
 <div class="container">
@@ -7,7 +8,6 @@ get_header();
         while (have_posts()) : the_post();
             $mod = get_sims4_mod_data();
             $thumbnail_url = $mod['thumbnail'];
-            echo print_r(get_post(), 1);
             ?>
 
             <div class="row justify-content-center text-center">
