@@ -1,6 +1,7 @@
 <?php
 get_header();
 get_template_part('template-parts/categories-grid');
+
 ?>
 
 <div class="container">
@@ -25,6 +26,8 @@ get_template_part('template-parts/categories-grid');
                                  style="max-height: 550px; width: 100%; object-fit: cover;">
                         </a>
                     </div>
+
+                    <?php get_template_part('template-parts/mod', 'carusel'); ?>
 
                     <div class="mod-description text-secondary fs-5 text-start lh-base mb-5 px-2">
                         <?php the_content(); ?>
