@@ -11,7 +11,7 @@ if (!$mod['thumbnail']) {
 
 <div class="col">
     <div class="card h-100 shadow-sm border border-2 border-dark overflow-hidden hover-card">
-        <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark d-block h-100">
+        <a href="<?php the_permalink(); ?>" class="text-decoration-none text-dark d-block h-220">
             <img src="<?php echo esc_url($mod['thumbnail']); ?>" class="card-img-top"
                  alt="<?php the_title_attribute(); ?>"
                  style="height: 220px; object-fit: cover;">

@@ -27,6 +27,11 @@ get_template_part('template-parts/categories-grid'); ?>
         <?php endif; ?>
 
     </div>
+
+    <?php
+    get_template_part('template-parts/pagination');
+    ?>
+
 </div>
 
 <?php get_footer(); ?>
