@@ -31,7 +31,6 @@ if (is_archive()) {
 
     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-5 row-cols-lg-4 g-3 text-center justify-content-center mb-5">
 
-        <!-- 1. Одежда -->
         <?php foreach ($categories as $cat):
             $img_url = esc_url(get_field('category_image',
                     'category_' . $cat->term_id));
