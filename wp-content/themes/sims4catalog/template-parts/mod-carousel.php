@@ -9,13 +9,11 @@ $slides = $mod['screenshots'];
         <?php foreach ($slides as $index => $slide_url) : ?>
             <div class="col">
                 <a href="#"
-                   data-bs-toggle="modal"
-                   data-bs-target="#imageLightbox"
                    data-bs-slide-to="<?php echo $index; ?>"
-                   class="d-block ratio ratio-1x1 border border-2 border-dark rounded-3 overflow-hidden shadow-sm hover-card">
+                   class="d-block ratio ratio-1x1 border border-2 border-dark rounded-3 overflow-hidden shadow-sm hover-card js-open-lightbox">
                     <img src="<?php echo esc_url($slide_url); ?>"
                          class="img-fluid"
-                         alt=""
+                         alt="Скриншот мода Sims 4"
                          style="object-fit: cover; width: 100%; height: 100%;">
                 </a>
             </div>

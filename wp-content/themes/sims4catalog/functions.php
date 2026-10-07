@@ -18,6 +18,13 @@ function sims4_catalog_scripts()
     wp_enqueue_script('bootstrap-js',
         'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
         [], '5.3.3', true);
+    wp_enqueue_script(
+        'sims4-lightbox',
+        get_theme_file_uri('assets/js/lightbox-clicker.js'),
+        array(),
+        '1.0.0',
+        true
+    );
 }
 
 add_action('wp_enqueue_scripts', 'sims4_catalog_scripts');
