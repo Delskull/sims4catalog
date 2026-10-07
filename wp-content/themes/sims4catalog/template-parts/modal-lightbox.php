@@ -2,7 +2,7 @@
 /**
  * Шаблон модального окна Lightbox для увеличения картинок
  */
-$mod = get_sims4_mod_data();
+$mod = $args['mod_data'];
 $thumbnail_url = $mod['thumbnail'];
 ?>
 

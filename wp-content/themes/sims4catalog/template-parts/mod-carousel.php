@@ -1,10 +1,9 @@
 <?php
-$mod = get_sims4_mod_data();
-$slides = $mod['screenshots']; // Наш массив с картинками, который только что вывелся на экран
-$mod_id = get_the_ID(); // Получаем уникальный ID текущего мода
-if (empty($slides)) {
-    $slides = 'https://placehold.co';
-}
+$mod_repo = new Sims4_mod_repository();
+$mod = $mod_repo->get_all_data();
+
+// 2. Забираем массив скриншотов из объекта
+$slides = $mod['screenshots'];
 ?><!-- 🔥 НАЧАЛО СЕТКИ МАЛЕНЬКИХ КВАДРАТИКОВ -->
 <div class="mb-5">
     <!-- Сетка: по умолчанию 3 в ряд, на больших экранах до 6 в ряд -->

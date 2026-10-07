@@ -7,8 +7,8 @@ get_template_part('template-parts/categories-grid');
 <div class="container">
     <?php if (have_posts()):
         while (have_posts()) : the_post();
-            $mod = get_sims4_mod_data();
-            $thumbnail_url = $mod['thumbnail'];
+            $mod_repo = new Sims4_mod_repository();
+            $mod = $mod_repo->get_all_data();
             ?>
 
             <div class="row justify-content-center text-center">
@@ -20,14 +20,14 @@ get_template_part('template-parts/categories-grid');
                         <a href="#" data-bs-toggle="modal"
                            data-bs-target="#imageLightbox"
                            class="d-inline-block hover-zoom shadow rounded-3 overflow-hidden border border-2 border-dark">
-                            <img src="<?php echo esc_url($thumbnail_url); ?>"
+                            <img src="<?php echo esc_url($mod['thumbnail']); ?>"
                                  class="img-fluid rounded-3 shadow border border-2 border-dark"
                                  alt="<?php the_title_attribute(); ?>"
                                  style="max-height: 550px; width: 100%; object-fit: cover;">
                         </a>
                     </div>
 
-                    <?php get_template_part('template-parts/mod', 'carusel'); ?>
+                    <?php get_template_part('template-parts/mod-carousel',null,['mod_data' => $mod]); ?>
 
                     <div class="mod-description text-secondary fs-5 text-start lh-base mb-5 px-2">
                         <?php the_content(); ?>
@@ -69,7 +69,7 @@ get_template_part('template-parts/categories-grid');
                 </div>
             </div>
 
-            <?php get_template_part('template-parts/modal', 'lightbox'); ?>
+            <?php get_template_part('template-parts/modal-lightbox',null,['mod_data' => $mod]); ?>
 
         <?php
         endwhile;

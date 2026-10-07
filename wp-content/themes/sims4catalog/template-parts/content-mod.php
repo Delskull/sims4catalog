@@ -3,7 +3,8 @@
  * Шаблон одной карточки мода для списков
  */
 
-$mod = get_sims4_mod_data();
+$mod_repo = new Sims4_mod_repository();
+$mod = $mod_repo->get_all_data();
 if (!$mod['thumbnail']) {
     $mod['thumbnail'] = 'https://placehold.co';
 }
