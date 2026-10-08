@@ -21,7 +21,7 @@ get_template_part('template-parts/categories-grid');
                            data-bs-target="#imageLightbox"
                            class="d-inline-block hover-zoom shadow rounded-3 overflow-hidden border border-2 border-dark">
                             <img src="<?php echo esc_url($mod['thumbnail']); ?>"
-                                 class="img-fluid rounded-3 shadow border border-2 border-dark"
+                                 class="img-fluid rounded-3 shadow border-2 border-dark"
                                  alt="<?php the_title_attribute(); ?>"
                                  style="max-height: 550px; width: 100%; object-fit: cover;">
                         </a>
