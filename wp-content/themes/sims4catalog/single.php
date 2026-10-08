@@ -37,7 +37,7 @@ get_template_part('template-parts/categories-grid');
                         <div class="row align-items-center justify-content-center g-3">
 
                             <div class="col-sm-6 text-sm-start text-center ps-sm-4">
-                                <span class="d-block text-muted small text-uppercase fw-bold">Автор контента</span>
+                                <span class="d-block text-muted small text-uppercase fw-bold"><?php esc_html_e('Автор контента', 'sims4catalog') ?></span>
                                 <span class="fs-5 text-dark fw-bold">
                                      <?php echo !empty($mod['author'])
                                              ? esc_html($mod['author'])

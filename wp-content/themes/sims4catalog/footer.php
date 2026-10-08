@@ -1,6 +1,7 @@
 <footer class="bg-light text-center text-muted py-3 mt-auto border-top w-100">
     <div class="container">
-        <p class="mb-0">&copy; <?php echo date('Y'); ?> Sims 4 Mods Catalog. Разработчик: Delskull</p>
+        <p class="mb-0">&copy; <?php echo date('Y');
+            esc_html_e(' Sims 4 Mods Catalog. Разработчик: Delskull') ?></p>
     </div>
 </footer>
 

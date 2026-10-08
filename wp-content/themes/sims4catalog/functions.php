@@ -27,6 +27,22 @@ function sims4_catalog_scripts()
     );
 }
 
+// хелпер для archive
+function sims4_mod(int $mod_id = 0): array
+{
+    static $memory = [];
+
+    if ($mod_id === 0) {
+        $mod_id = get_the_ID();
+    }
+    if (!isset($memory[$mod_id])) {
+        $repo = new Sims4_Mod_Repository($mod_id);
+        $memory[$mod_id] = $repo->get_all_data();
+    }
+
+    return $memory[$mod_id];
+}
+
 add_action('wp_enqueue_scripts', 'sims4_catalog_scripts');
 add_filter('use_block_editor_for_post', '__return_false');
 add_theme_support('post-thumbnails');

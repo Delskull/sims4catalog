@@ -40,14 +40,14 @@ if (empty($slides)) {
                                 data-bs-slide="prev">
                             <span class="carousel-control-prev-icon"
                                   aria-hidden="true"></span>
-                            <span class="visually-hidden">Назад</span>
+                            <span class="visually-hidden"><?php esc_html_e('Назад')?></span>
                         </button>
                         <button class="carousel-control-next" type="button"
                                 data-bs-target="#lightboxCarousel"
                                 data-bs-slide="next">
                             <span class="carousel-control-next-icon"
                                   aria-hidden="true"></span>
-                            <span class="visually-hidden">Вперед</span>
+                            <span class="visually-hidden"><?php esc_html_e('Вперёд')?></span>
                         </button>
                     <?php endif; ?>
 
