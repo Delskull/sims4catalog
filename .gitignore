@@ -15,6 +15,7 @@ my-plugins/
 /wp-content/uploads
 
 /wp-content/plugins/*
+!/wp-content/plugins/sims4-auto-importer/composer.json
 !/wp-content/plugins/sims4-auto-importer/
 !/wp-content/plugins/sims4-auto-importer/**
 !/wp-content/plugins/sims4-auto-importer/sims4-auto-importer.php
@@ -28,3 +29,4 @@ my-plugins/
 .DS_Store
 Thumbs.db
 *:Zone.Identifier
+/wp-content/plugins/sims4-auto-importer/lib/
