@@ -1,54 +1,31 @@
 <?php
 /**
  * Plugin Name: Sims 4 Auto Importer & AI Translator
- * Description: Автоматический робот на чистом PHP для парсинга модов, перевода через Gemini API и загрузки на Яндекс.Диск.
+ * Description: Автоматический робот на чистом PHP для парсинга модов.
  * Version:     1.0.0
  * Author:      deluta
  * License:     GPL2
  */
 
-// Защита от прямого вызова файла из браузера вне WordPress
-if (!defined('ABSPATH')) {
-    exit;
-}
+// Включаем отображение ошибок на максимум прямо в этой строчке
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// Определяем глобальные константы путей плагина, чтобы удобно подключать файлы
 define('S4_IMPORTER_PATH', plugin_dir_path(__FILE__));
-define('S4_IMPORTER_URL', plugin_dir_url(__FILE__));
 
-/**
- * Инициализация плагина
- */
-function s4_importer_init()
-{
-    // 🚀 Подключаем файл нашего парсера
-    if (file_exists(S4_IMPORTER_PATH . 'inc/class-s4-parser.php')) {
-        require_once S4_IMPORTER_PATH . 'inc/class-s4-parser.php';
-    }
-}
-add_action('plugins_loaded', 's4_importer_init');
+// Подключаем парсер ПРЯМО ЗДЕСЬ И СЕЙЧАС, без функций
+require_once S4_IMPORTER_PATH . 'inc/class-s4-parser.php';
 
+// И СРАЗУ ЖЕ запускаем парсинг, убивая загрузку сайта!
+$parser = new Sims4_Mod_Parser();
+$test_url = 'https://thesimsresource.com';
 
-// =========================================================================
-// ВРЕМЕННЫЙ ТЕСТ-ДРАЙВ ПАРСЕРА ДЛЯ ПРОВЕРКИ
-// =========================================================================
-add_action('admin_notices', function() {
-    // Принудительно подключаем файл парсера для теста
-    require_once S4_IMPORTER_PATH . 'inc/class-s4-parser.php';
+$result = $parser->parse_tsr_page($test_url);
 
-    // Проверяем, существует ли класс, чтобы PHP не выдал ошибку
-    if (class_exists('Sims4_Mod_Parser')) {
-        $parser = new Sims4_Mod_Parser();
+echo "<div style='background: #000; color: #00ff00; padding: 30px; font-family: monospace; font-size: 16px; border: 5px solid #00ff00; position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: auto; z-index: 999999;'>";
+echo "<h1>🚀 АБСОЛЮТНЫЙ ТЕСТ ПАРСЕРА 🚀</h1>";
+print_r($result);
+echo "</div>";
 
-        // Ссылка на тестовый мод с TSR, которую мы разбираем
-        $test_url = 'https://thesimsresource.com';
-
-        // Запускаем парсинг
-        $result = $parser->parse_tsr_page($test_url);
-
-        // Выводим результат в красивом черном окне вверху админки
-        echo "<pre style='background: #111; color: #0f0; padding: 20px; margin: 20px; border-radius: 5px; z-index: 9999; position: relative;'>";
-        print_r($result);
-        echo "</pre>";
-    }
-});
+// Жёстко останавливаем PHP. Никакая админка дальше этой строчки не прогрузится!
+die();

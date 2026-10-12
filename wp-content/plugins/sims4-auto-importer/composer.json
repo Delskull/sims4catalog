@@ -1,12 +1,8 @@
 {
   "name": "deluta/sims4-auto-importer",
-  "description": "Автоматический импортер модов Симс 4",
   "type": "wordpress-plugin",
-  "license": "GPL-2.0-or-later",
   "require": {
-    "php": ">=7.1",
-    "ext-dom": "*",
-    "ext-simplexml": "*"
+    "php": ">=7.1"
   },
   "autoload": {
     "psr-4": {
@@ -14,4 +10,3 @@
     }
   }
 }
-
