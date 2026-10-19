@@ -55,6 +55,12 @@ class Sims4_Mod_Parser
     /**
      * Основной метод для детального парсинга страницы конкретного выбранного мода
      */
+    /**
+     * Основной метод для детального парсинга страницы конкретного выбранного мода
+     */
+    /**
+     * Основной метод для детального парсинга страницы конкретного выбранного мода
+     */
     public function parse_tsr_page(string $url): array
     {
         $html_content = $this->fetch_html($url);
@@ -76,67 +82,61 @@ class Sims4_Mod_Parser
         @$dom->loadHTML('<?xml encoding="UTF-8">' . $html_content);
         $xpath = new DOMXPath($dom);
 
-        // =========================================================================
-// 🎯 ИСПРАВЛЕННЫЙ БЛОК СБОРА НАЗВАНИЯ (TITLE)
-// =========================================================================
-// 1. Пробуем найти строго h1 с конкретным классом browse-info-title-info
+        // Сборка названия из тега <h1 class="browse-info-title-info">
         $title_nodes = $xpath->query('//h1[contains(@class, "browse-info-title-info")]');
-
         if ($title_nodes && $title_nodes->length > 0) {
             $title = trim($title_nodes->item(0)->nodeValue);
         } else {
-            // 2. Резервный вариант: если класса нет, забираем любой первый h1 на странице
             $fallback_title_nodes = $xpath->query('//h1');
             $title = ($fallback_title_nodes && $fallback_title_nodes->length > 0)
                 ? trim($fallback_title_nodes->item(0)->nodeValue)
                 : 'Unknown Sims 4 Mod';
         }
 
-        $notes_nodes = $xpath->query('//*[contains(@class, "item-notes")]') ?: $xpath->query('//*[@id="description"]');
-
-
         // =========================================================================
-        // 🎯 ИСПРАВЛЕННЫЙ БЛОК ОПИСАНИЯ: УМНЫЙ СБОР + ВЫРЕЗАНИЕ СЛОВ-ПАРАЗИТОВ
+        // 🎯 ИСПРАВЛЕННЫЙ БЛОК ОПИСАНИЯ: РЕГУЛЯРНАЯ ФИЛЬТРАЦИЯ (REGEX СНАЙПЕР)
         // =========================================================================
         $p_nodes = $xpath->query('//div[contains(@class, "info-description")]//p');
         $description = '';
 
         if ($p_nodes && $p_nodes->length > 0) {
-            // 1. Критические стоп-слова. Если абзац СОСТОИТ из этого или содержит жесткий мусор, пропускаем его целиком.
-            $stop_words = [
-                'created for:',
-                'terms of use',
-                'tou:',
-                'mesh by',
-                'http',
-                'www.',
-                'belongs to a set',
-                'whole set',
-                'click here',
-                'item id:',
-                'itemid:',
-                'id:',
-                'filesize:',
-                'file size:',
-                'hardware requirements'
+            // Список регулярных паттернов для поиска мусора в любых регистрах и комбинациях
+            $stop_patterns = [
+                '/created\s+for/ui',          // Поймает "Created for", "Created     for"
+                '/terms\s+of\s+use/ui',       // Поймает "Terms of Use", "terms   of   use"
+                '/tou:/ui',
+                '/mesh\s+by/ui',
+                '/http/ui',
+                '/www\./ui',
+                '/belongs\s+to\s+a\s+set/ui',
+                '/whole\s+set/ui',
+                '/click\s+here/ui',
+                '/item\s*id/ui',              // Поймает "Item ID", "ItemID"
+                '/id:/ui',
+                '/filesize/ui',               // Поймает "Filesize", "File size"
+                '/file\s+size/ui',
+                '/hardware\s+requirements/ui'
             ];
 
             foreach ($p_nodes as $p_node) {
+                // Берем чистый nodeValue и нормализуем пробельные символы (включая &nbsp; и скрытые переносы)
                 $text = trim($p_node->nodeValue);
-                $lower_text = mb_strtolower($text, 'UTF-8');
+                $text = preg_replace('/[\s\x{00A0}]+/u', ' ', $text); // Заменяем все пробельные юникод-символы на обычный пробел
 
                 if (empty($text)) {
                     continue;
                 }
 
                 $is_technical = false;
-                foreach ($stop_words as $word) {
-                    if (mb_strpos($lower_text, $word) !== false) {
+                foreach ($stop_patterns as $pattern) {
+                    // Используем регулярку (ей не важен регистр букв благодаря флагу /i)
+                    if (preg_match($pattern, $text)) {
                         $is_technical = true;
                         break;
                     }
                 }
 
+                // Если абзац чист от регулярных паттернов — забираем!
                 if (!$is_technical) {
                     $description = $text;
                     break;
@@ -144,9 +144,9 @@ class Sims4_Mod_Parser
             }
         }
 
-        // Резерв: если живого текста не нашлось, берем первый доступный тег
         if (empty($description)) {
             if ($p_nodes && $p_nodes->length > 0) {
+                // Если кругом один мусор, берем первый попавшийся абзац и очистим его ниже через bad_phrases
                 $description = trim($p_nodes->item(0)->nodeValue);
             } else {
                 $fallback_nodes = $xpath->query('//*[contains(@class, "item-notes")]') ?: $xpath->query('//*[@id="description"]');
@@ -155,11 +155,15 @@ class Sims4_Mod_Parser
         }
 
         // =========================================================================
-        // ✂️ БЛОК ТОЧЕЧНОЙ ОЧИСТКИ ТЕКСТА (ВЫРЕЗАЕМ ЗАПРЕЩЕННЫЕ СЛОВА)
+        // ✂️ БЛОК ТОЧЕЧНОЙ ОЧИСТКИ (ПОДСТРАХОВКА НА СЛУЧАЙ ДЕФОЛТНОГО ФОЛБЕКА)
         // =========================================================================
         if (!empty($description)) {
-            // Список фраз, которые нужно молча удалить из текста, не ломая сам текст
+            // Фразы-паразиты, которые мы просто вырезаем из текста под чистую
             $bad_phrases = [
+                'created for: the sims 4',
+                'created for the sims 4',
+                'creator terms of use',
+                'terms of use',
                 'tsr exclusive',
                 'tsr-exclusive',
                 'patreon exclusive',
@@ -169,36 +173,60 @@ class Sims4_Mod_Parser
             ];
 
             foreach ($bad_phrases as $phrase) {
-                // Регулярка /.../ui ищет фразу без учета регистра (u — поддержка кириллицы/юникода, i — регистр)
                 $pattern = '/' . preg_quote($phrase, '/') . '/ui';
                 $description = preg_replace($pattern, '', $description);
             }
         }
 
-        // Финальное сглаживание пробелов после вырезания слов
         $description = preg_replace('/\s+/', ' ', $description);
-        $description = trim($description, " \t\n\r\0\x0B-_,."); // Чистим повисшие знаки препинания по краям
+        $description = trim($description, " \t\n\r\0\x0B-_,.");
 
 
 
 
-
-
+        // Собираем имя автора мода (Ищем класс .artist-name)
         $author_nodes = $xpath->query('//*[contains(@class, "artist-name")]');
         $author = ($author_nodes && $author_nodes->length > 0) ? trim($author_nodes->item(0)->nodeValue) : 'Unknown Artist';
 
-        $correct_mod_url   = "https://www.thesimsresource.com/downloads/{$item_id}";
-        $download_page_url = "https://thesimsresource.com{$item_id}";
+        // ДИНАМИЧЕСКИЙ СБОР ТИПА (Хлебные крошки)
+        $category_crumbs = $xpath->query('//div[contains(@class, "browse-info-title")]//span') ?: $xpath->query('//p[contains(@class, "content-breadcrumbs")]//*');
+        $detected_type = 'Clothing';
+        if ($category_crumbs && $category_crumbs->length > 1) {
+            $detected_type = trim($category_crumbs->item(1)->nodeValue);
+        }
 
-        $string_id = (string)$item_id;
-        $folder_prefix = substr($string_id, 0, 4);
-        $screenshot_url = "https://thesimsresource.com{$folder_prefix}/{$string_id}.jpg";
+        // ДИНАМИЧЕСКИЙ СБОР ПОДТИПА (Свойства)
+        $subtype_nodes = $xpath->query('//strong[contains(text(), "Type:")]/following-sibling::text()') ?: $xpath->query('//li[contains(., "Type:")]');
+        $detected_subtype = 'Unknown';
+        if ($subtype_nodes && $subtype_nodes->length > 0) {
+            $detected_subtype = trim(str_ireplace('Type:', '', $subtype_nodes->item(0)->nodeValue));
+        }
+
+        // 🎯 Применение исправленного блока скриншотов
+        $screenshot_url = '';
+        $img_nodes = $xpath->query('//img[contains(@class, "carousel-image")]');
+        if ($img_nodes && $img_nodes->length > 0) {
+            $raw_src = trim($img_nodes->item(0)->getAttribute('src'));
+            if (!empty($raw_src)) {
+                $screenshot_url = (strpos($raw_src, 'http') === 0) ? $raw_src : 'https://www.thesimsresource.com' . $raw_src;
+            }
+        }
+
+        if (empty($screenshot_url)) {
+            $string_id = (string)$item_id;
+            $folder_prefix = substr($string_id, 0, 4);
+            $screenshot_url = "https://thesimsresource.com{$folder_prefix}/w-920h-690-{$string_id}.jpg";
+        }
+
+        $correct_mod_url   = "https://thesimsresource.com{$item_id}";
+        $download_page_url = "https://thesimsresource.comdetails/id/{$item_id}";
 
         return [
             'title'               => $title,
             'description'         => $description,
             'author'              => $author,
-            'type'                => 'Clothing', // Изменили дефолтный тип на одежду
+            'type'                => $detected_type,
+            'subtype'             => $detected_subtype,
             'source_original_url' => $correct_mod_url,
             'item_id'             => $item_id,
             'download_page_url'   => $download_page_url,
@@ -206,6 +234,7 @@ class Sims4_Mod_Parser
             'images_count'        => 1
         ];
     }
+
 
     private function fetch_html(string $url): string
     {
