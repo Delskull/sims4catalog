@@ -218,7 +218,7 @@ class Sims4_Mod_Parser
             $screenshot_url = "https://thesimsresource.com{$folder_prefix}/w-920h-690-{$string_id}.jpg";
         }
 
-        $correct_mod_url   = "https://thesimsresource.com{$item_id}";
+        $correct_mod_url   = "https://thesimsresource.com/downloads/{$item_id}";
         $download_page_url = "https://thesimsresource.comdetails/id/{$item_id}";
 
         return [
