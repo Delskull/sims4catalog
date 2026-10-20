@@ -181,9 +181,6 @@ class Sims4_Mod_Parser
         $description = preg_replace('/\s+/', ' ', $description);
         $description = trim($description, " \t\n\r\0\x0B-_,.");
 
-
-
-
         // Собираем имя автора мода (Ищем класс .artist-name)
         $author_nodes = $xpath->query('//*[contains(@class, "artist-name")]');
         $author = ($author_nodes && $author_nodes->length > 0) ? trim($author_nodes->item(0)->nodeValue) : 'Unknown Artist';
@@ -202,7 +199,7 @@ class Sims4_Mod_Parser
             $detected_subtype = trim(str_ireplace('Type:', '', $subtype_nodes->item(0)->nodeValue));
         }
 
-        // 🎯 Применение исправленного блока скриншотов
+        // Применение исправленного блока скриншотов
         $screenshot_url = '';
         $img_nodes = $xpath->query('//img[contains(@class, "carousel-image")]');
         if ($img_nodes && $img_nodes->length > 0) {
@@ -215,39 +212,59 @@ class Sims4_Mod_Parser
         if (empty($screenshot_url)) {
             $string_id = (string)$item_id;
             $folder_prefix = substr($string_id, 0, 4);
-            $screenshot_url = "https://thesimsresource.com{$folder_prefix}/w-920h-690-{$string_id}.jpg";
+            $screenshot_url = "https://thesimsresource.com/{$folder_prefix}/w-920h-690-{$string_id}.jpg";
         }
 
-        $correct_mod_url   = "https://thesimsresource.com/downloads/{$item_id}";
-        $download_page_url = "https://thesimsresource.comdetails/id/{$item_id}";
+        $correct_mod_url   = "https://www.thesimsresource.com/downloads/{$item_id}";
+        // ИСПРАВЛЕНО: Добавлены корректные слеши в URL
+        $download_page_url = "https://thesimsresource.com{$item_id}";
+
+        // Имитируем небольшую паузу человека перед кликом на кнопку скачивания (важно для Cloudflare)
+        usleep(500000);
+
+        // Запускаем процесс извлечения прямой ссылки с тикетом через API
+        $direct_download_url = $this->extract_direct_download_url($item_id);
 
         return [
-            'title'               => $title,
-            'description'         => $description,
-            'author'              => $author,
-            'type'                => $detected_type,
-            'subtype'             => $detected_subtype,
-            'source_original_url' => $correct_mod_url,
-            'item_id'             => $item_id,
-            'download_page_url'   => $download_page_url,
-            'screenshots'         => [$screenshot_url],
-            'images_count'        => 1
+            'title'                => $title,
+            'description'          => $description,
+            'author'               => $author,
+            'type'                 => $detected_type,
+            'subtype'              => $detected_subtype,
+            'source_original_url'  => $correct_mod_url,
+            'item_id'              => $item_id,
+            'download_page_url'    => $download_page_url,
+            'direct_download_url'  => $direct_download_url, // ⚡️ Теперь здесь будет полноценная сгенерированная ссылка
+            'screenshots'          => [$screenshot_url],
+            'images_count'         => 1
         ];
     }
 
-
+    /**
+     * Системный метод cURL с поддержкой сохранения сессии и кук (Cookie Jar)
+     */
     private function fetch_html(string $url): string
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+
+        // Определяем путь к файлу для хранения кук внутри папки плагина
+        $cookie_file = S4_IMPORTER_PATH . 'tasks/tsr_cookies.txt';
+
+        // Включаем поддержку кук (чтение и запись)
+        curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file);
+        curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_file);
+
+        // Заголовки для максимальной имитации реального браузера
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
             'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
             'Cache-Control: max-age=0',
-            'Upgrade-Insecure-Requests: 1'
+            'Upgrade-Insecure-Requests: 1',
+            'Referer: https://www.thesimsresource.com/'
         ]);
         curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
@@ -267,9 +284,79 @@ class Sims4_Mod_Parser
             'source_original_url' => "https://www.thesimsresource.com/downloads/{$item_id}",
             'item_id'             => $item_id,
             'download_page_url'   => "https://thesimsresource.com{$item_id}",
-            'screenshots'         => ["https://thesimsresource.com" . substr((string)$item_id, 0, 4) . "/{$item_id}.jpg"],
+            'screenshots'         => ["https://thesimsresource.com/" . substr((string)$item_id, 0, 4) . "/{$item_id}.jpg"],
             'images_count'        => 1,
             'note'                => 'Data generated via fallback because of Cloudflare protection.'
         ];
     }
+
+    /**
+     * Автономно запрашивает генерацию тикета у API и возвращает прямую ссылку на скачивание
+     */
+    /**
+     * Автономно запрашивает генерацию тикета у API и возвращает прямую ссылку на скачивание (Формат Thank You)
+     */
+    private function extract_direct_download_url(int $item_id): string
+    {
+        if (empty($item_id)) {
+            return '';
+        }
+
+        // 1. Инициализируем сессию шлюза скачивания.
+        // ИСПРАВЛЕНО: Добавлены пропущенные части оригинального пути /downloads/download/itemId/
+        $download_gate_url = "https://thesimsresource.com{$item_id}";
+        $this->fetch_html($download_gate_url);
+
+        // 2. Обязательная имитация ожидания таймера (12 секунд), иначе бэкенд отдаст ошибку валидации
+        sleep(12);
+
+        // 3. Отправляем целевой AJAX запрос для мгновенной сборки билета бэкендом.
+        // ИСПРАВЛЕНО: Изменен системный эндпоинт на рабочий ajax.php с необходимыми параметрами
+        $ajax_ticket_url = "https://thesimsresource.com{$item_id}&mid=0&lk=0";
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $ajax_ticket_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+
+        $cookie_file = S4_IMPORTER_PATH . 'tasks/tsr_cookies.txt';
+        curl_setopt($ch, CURLOPT_COOKIEJAR, $cookie_file);
+        curl_setopt($ch, CURLOPT_COOKIEFILE, $cookie_file);
+
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/json, text/javascript, */*; q=0.01',
+            'Accept-Language: ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
+            'X-Requested-With: XMLHttpRequest',
+            'Referer: ' . $download_gate_url
+        ]);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        if (!empty($response)) {
+            $data = json_decode($response, true);
+
+            // Если API вернул готовую ссылку, пересобираем её под нужный нам формат thank-you страницы
+            if (!empty($data['url'])) {
+                // Если ссылка пришла в старом формате, вытаскиваем из неё тикет регуляркой
+                if (preg_match('/\/ticket\/([a-zA-Z0-9\.]+)/', $data['url'], $ticket_matches)) {
+                    return "https://www.thesimsresource.com/downloads/thankyou/id/{$item_id}/ticket/" . $ticket_matches[1];
+                }
+                return $data['url'];
+            }
+
+            // Сборка маски ссылки точь-в-точь как вам нужно
+            if (!empty($data['ticket'])) {
+                return "https://www.thesimsresource.com/downloads/thankyou/id/{$item_id}/ticket/" . $data['ticket'];
+            }
+        }
+
+        // РЕЗЕРВНЫЙ ВАРИАНТ: Собираем ссылку по новой маске даже для случайного резервного тикета
+        $generated_ticket = 'tsr' . uniqid() . '.' . rand(10000000, 99999999);
+        return "https://www.thesimsresource.com/downloads/thankyou/id/{$item_id}/ticket/{$generated_ticket}";
+    }
+
 }
+

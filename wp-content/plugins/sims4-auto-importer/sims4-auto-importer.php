@@ -36,6 +36,12 @@ add_action('init', function() {
             wp_die('У вас недостаточно прав для запуска этой операции.');
         }
 
+        // ПРЕДОТВРАЩЕНИЕ ТАЙМАУТА: Расширяем максимальное время выполнения PHP скрипта.
+        // Ожидание генерации тикета занимает около 12-15 секунд, стандартных 30 секунд может не хватить.
+        if (!ini_get('safe_mode')) {
+            set_time_limit(180);
+        }
+
         require_once S4_IMPORTER_PATH . 'inc/class-s4-parser.php';
 
         if (class_exists('Sims4_Mod_Parser')) {
@@ -45,10 +51,9 @@ add_action('init', function() {
             $category_url = 'https://www.thesimsresource.com/downloads/browse/category/sims4-clothing/';
 
             // 1. Вытаскиваем случайный рабочий URL мода из каталога
-            // Метод get_random_mod_url_from_category сам добавит туда "/page/XX/"
             $random_target_url = $parser->get_random_mod_url_from_category($category_url);
 
-            // 2. Парсим детальные данные мода
+            // 2. Парсим детальные данные мода (включая прямую ссылку с тикетом)
             $mod_data = $parser->parse_tsr_page($random_target_url);
 
             // 3. Вычисляем правильный динамический путь к папке задач внутри плагина
@@ -63,12 +68,12 @@ add_action('init', function() {
             $mod_data['status'] = 'raw';
             $mod_data['parsed_at'] = current_time('mysql');
 
-            // 4. Записываем JSON таску на диск (Раскомментировано и исправлено)
+            // 4. Записываем JSON таску на диск
             $json_text = json_encode($mod_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             file_put_contents($file_path, $json_text);
             @chmod($file_path, 0777);
 
-            // 5. Выводим чистый отчет без наложения верстки темы/админки WordPress
+            // 5. Выводим чистый отчет
             ?>
             <!DOCTYPE html>
             <html lang="ru">
@@ -92,7 +97,7 @@ add_action('init', function() {
             </body>
             </html>
             <?php
-            exit; // Останавливаем выполнение WP, чтобы не рендерилась остальная админка
+            exit;
         }
     }
 });
