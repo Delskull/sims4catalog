@@ -14,6 +14,7 @@ services:
   wordpress_sims:
     depends_on:
       - db_sims
+      - pupflare_sims
     build: .
     container_name: sims_wordpress
     restart: always
@@ -39,6 +40,17 @@ services:
       PMA_HOST: ${DB_HOST}
       PMA_USER: ${DB_USER}
       PMA_PASSWORD: ${DB_PASSWORD}
+
+  pupflare_sims:
+    build: ./pupflare
+    container_name: sims_pupflare
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - CAMOUFOX_BLOCK_IMAGES=true
+
 
 volumes:
   db_data_sims:

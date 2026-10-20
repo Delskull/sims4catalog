@@ -30,3 +30,8 @@ my-plugins/
 Thumbs.db
 *:Zone.Identifier
 /wp-content/plugins/sims4-auto-importer/lib/
+
+# Игнорируем тяжелые зависимости и локальные логи сервиса авторизации Pupflare
+pupflare/node_modules/
+pupflare/.npm/
+pupflare/package-lock.json
