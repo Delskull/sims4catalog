@@ -1,0 +1,6 @@
+{
+    "downloadDirectory": "/home/deluta/projects/sims4catalog/tsr-downloader/download",
+    "maxActiveDownloads": 4,
+    "saveDownloadQueue": true,
+    "debug": false
+}

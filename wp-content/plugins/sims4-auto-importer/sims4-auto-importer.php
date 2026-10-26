@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Sims 4 Auto Importer & AI Translator
- * Description: Автоматический робот для парсинга модов, генерации случайных задач и интеграции с ИИ.
- * Version:     1.1.0
+ * Description: Автоматический робот для парсинга модов и генерации случайных задач.
+ * Version:     1.2.0
  * Author:      deluta
  */
 
@@ -25,19 +25,15 @@ function s4_importer_init()
 add_action('plugins_loaded', 's4_importer_init');
 
 // =========================================================================
-// 🎲 УМНЫЙ СБОР СЛУЧАЙНОГО МОДА ИЗ КАТЕГОРИИ И ЗАПИСЬ В JSON
+// 🎲 СБОР СЛУЧАЙНОГО МОДА ИЗ КАТЕГОРИИ И ЗАПИСЬ В JSON
 // =========================================================================
 add_action('init', function() {
-    // Проверяем параметры, авторизацию админа и исключаем AJAX-запросы
     if (is_admin() && isset($_GET['run_parser']) && $_GET['run_parser'] === '1' && !defined('DOING_AJAX')) {
 
-        // Защита: запускать парсер могут только администраторы сайта
         if (!current_user_can('manage_options')) {
             wp_die('У вас недостаточно прав для запуска этой операции.');
         }
 
-        // ПРЕДОТВРАЩЕНИЕ ТАЙМАУТА: Расширяем максимальное время выполнения PHP скрипта.
-        // Ожидание генерации тикета занимает около 12-15 секунд, стандартных 30 секунд может не хватить.
         if (!ini_get('safe_mode')) {
             set_time_limit(180);
         }
@@ -47,16 +43,20 @@ add_action('init', function() {
         if (class_exists('Sims4_Mod_Parser')) {
             $parser = new Sims4_Mod_Parser();
 
-            // Ссылка на категорию модов Sims 4
             $category_url = 'https://www.thesimsresource.com/downloads/browse/category/sims4-clothing/';
 
-            // 1. Вытаскиваем случайный рабочий URL мода из каталога
+            // 1. Вытаскиваем случайный URL мода из каталога
             $random_target_url = $parser->get_random_mod_url_from_category($category_url);
 
-            // 2. Парсим детальные данные мода (включая прямую ссылку с тикетом)
+            // 2. Парсим детальные данные мода
             $mod_data = $parser->parse_tsr_page($random_target_url);
 
-            // 3. Вычисляем правильный динамический путь к папке задач внутри плагина
+            // 3. Пока просто помечаем, что скачивание ещё не реализовано
+            $mod_data['local_file_path'] = '';
+            $mod_data['download_status'] = 'pending';
+            $mod_data['download_note']   = 'Скачивание будет реализовано через Python-инструмент.';
+
+            // 4. Вычисляем путь к папке задач
             $tasks_dir = S4_IMPORTER_PATH . 'tasks/';
             if (!is_dir($tasks_dir)) {
                 mkdir($tasks_dir, 0777, true);
@@ -68,12 +68,12 @@ add_action('init', function() {
             $mod_data['status'] = 'raw';
             $mod_data['parsed_at'] = current_time('mysql');
 
-            // 4. Записываем JSON таску на диск
+            // 5. Записываем JSON
             $json_text = json_encode($mod_data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
             file_put_contents($file_path, $json_text);
             @chmod($file_path, 0777);
 
-            // 5. Выводим чистый отчет
+            // 6. Выводим отчёт
             ?>
             <!DOCTYPE html>
             <html lang="ru">
@@ -86,11 +86,19 @@ add_action('init', function() {
                 <h1>🎉 РОБОТ СГЕНЕРИРОВАЛ СЛУЧАЙНУЮ ТАСКУ! 🎉</h1>
                 <p><b>Случайная ссылка из каталога:</b> <a href="<?php echo esc_url($random_target_url); ?>" target="_blank" style="color:#fff;"><?php echo esc_html($random_target_url); ?></a></p>
                 <p><b>Файл сохранен:</b> <span style="color: #fff;">tasks/<?php echo esc_html($file_name); ?></span></p>
+
+                <p><b>Статус загрузки файла:</b>
+                    <span style="color: #ffcc00;">
+                        <?php echo esc_html(strtoupper($mod_data['download_status'])); ?>
+                    </span>
+                </p>
+                <p style="color: #ffcc00;"><b>Примечание:</b> <?php echo esc_html($mod_data['download_note']); ?></p>
+
                 <?php if (isset($mod_data['note'])) : ?>
                     <p style="color: #ffcc00;"><b>Внимание:</b> <?php echo esc_html($mod_data['note']); ?></p>
                 <?php endif; ?>
                 <hr style="border: 1px solid #00ff00;">
-                <h3>Собрано из DOM:</h3>
+                <h3>Итоговая структура JSON:</h3>
                 <pre style="background: #222; padding: 15px; color: #fff; overflow-x: auto; border: 1px solid #444;"><?php echo esc_html($json_text); ?></pre>
                 <p><a href="<?php echo esc_url(admin_url()); ?>" style="color: #00ff00;">&larr; Вернуться в панель управления WP</a></p>
             </div>
